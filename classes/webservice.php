@@ -366,9 +366,18 @@ class mod_zoom_webservice {
      */
     public function list_users() {
         if (empty(self::$userslist)) {
-            self::$userslist = $this->_make_paginated_call('users', null, 'users');
+            self::$userslist = $this->_make_paginated_call('users', array('include_fields' => 'custom_attributes'), 'users');
         }
         return self::$userslist;
+    }
+
+    protected function _is_manual_licensed_user($user) {
+        foreach ($user->custom_attributes as $attribute) {
+            if($attribute->name == 'manual' && $attribute->value == 'true') {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -382,7 +391,7 @@ class mod_zoom_webservice {
         $userslist = $this->list_users();
         $numusers = 0;
         foreach ($userslist as $user) {
-            if ($user->type != ZOOM_USER_TYPE_BASIC && ++$numusers >= $this->numlicenses) {
+            if ($user->type != ZOOM_USER_TYPE_BASIC && ++$numusers >= $this->numlicenses && !$this->_is_manual_licensed_user($user)) {
                 return true;
             }
         }
