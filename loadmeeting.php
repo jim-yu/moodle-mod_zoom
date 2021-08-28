@@ -102,6 +102,11 @@ if ($userishost) {
     if (!empty($config->recycleonjoin)) {
         $service = new mod_zoom_webservice();
         $service->provide_license($zoom->host_id);
+
+        if (in_array(zoom_get_api_identifier($USER), $alternativehosts, true)) {
+            $alternativehost = zoom_get_api_identifier($USER);
+            $service->provide_license($alternativehost);
+        }
     }
 }
 

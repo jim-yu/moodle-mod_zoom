@@ -391,7 +391,7 @@ class mod_zoom_webservice {
         $userslist = $this->list_users();
         $numusers = 0;
         foreach ($userslist as $user) {
-            if ($user->type != ZOOM_USER_TYPE_BASIC && ++$numusers >= $this->numlicenses && !$this->_is_manual_licensed_user($user)) {
+            if (!$this->_is_manual_licensed_user($user) && $user->type != ZOOM_USER_TYPE_BASIC && ++$numusers >= $this->numlicenses) {
                 return true;
             }
         }
