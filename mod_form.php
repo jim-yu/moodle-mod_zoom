@@ -685,6 +685,12 @@ class mod_zoom_mod_form extends moodleform_mod {
             if ($config->showalternativehosts == ZOOM_ALTERNATIVEHOSTS_INPUTFIELD) {
                 // Check if the listed alternative hosts are valid users on Zoom.
                 $alternativehosts = zoom_get_alternative_host_array_from_string($data['alternative_hosts']);
+
+                $total_license_need = count($alternativehosts) + 1;
+                if ( $service->_will_paid_user_limit_reach($total_license_need) ) {
+                    $service->prepare_license($total_license_need);
+                }
+
                 foreach ($alternativehosts as $alternativehost) {
                     $alternativehostUser = $service->get_user($alternativehost);
                     if (!($alternativehostUser)) {

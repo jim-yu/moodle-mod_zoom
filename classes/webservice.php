@@ -398,6 +398,17 @@ class mod_zoom_webservice {
         return false;
     }
 
+    public function _will_paid_user_limit_reach($num_license_needed) {
+        $userslist = $this->list_users();
+        $total_licensed_needed = $num_license_needed;
+        foreach ($userslist as $user) {
+            if ($user->type != ZOOM_USER_TYPE_BASIC) {
+                $total_licensed_needed++;
+            }
+        }
+        return $total_licensed_needed > $this->numlicenses;
+    }
+
     /**
      * Gets the ID of the user, of all the paid users, with the oldest last login time.
      *
@@ -407,13 +418,36 @@ class mod_zoom_webservice {
         $usertimes = array();
         $userslist = $this->list_users();
         foreach ($userslist as $user) {
-            if ($user->type != ZOOM_USER_TYPE_BASIC && isset($user->last_login_time)) {
+            if (!$this->_is_manual_licensed_user($user) && $user->type != ZOOM_USER_TYPE_BASIC && isset($user->last_login_time)) {
                 $usertimes[$user->id] = strtotime($user->last_login_time);
             }
         }
 
         if (!empty($usertimes)) {
             return array_search(min($usertimes), $usertimes);
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the ID of the user, of all the paid users, with the oldest last login time.
+     *
+     * @return string|false If user is found, returns the User ID. Otherwise, returns false.
+     */
+    protected function _get_list_active_paid_user_ids_by_login_time_desc() {
+        $usertimes = array();
+        $userslist = $this->list_users();
+        foreach ($userslist as $user) {
+            if (!$this->_is_manual_licensed_user($user) && $user->type != ZOOM_USER_TYPE_BASIC && isset($user->last_login_time)) {
+                $usertimes[$user->id] = strtotime($user->last_login_time);
+            }
+        }
+
+        if (!empty($usertimes)) {
+            $values = array_values($usertimes);
+            array_multisort($values, $usertimes);
+            return array_keys($usertimes);
         }
 
         return false;
@@ -628,6 +662,15 @@ class mod_zoom_webservice {
             }
             // Changes current user to pro so they can make a meeting.
             $this->_make_call("users/$zoomuserid", array('type' => ZOOM_USER_TYPE_PRO), 'patch');
+        }
+    }
+
+    public function prepare_license($num_license) {
+        $user_ids = $this->_get_list_active_paid_user_ids_by_login_time_desc();
+        $revoke_user_ids_license = array_slice($user_ids, 0, $num_license);
+
+        foreach ( $revoke_user_ids_license as $user_id ) {
+            $this->_make_call("users/$user_id", array('type' => ZOOM_USER_TYPE_BASIC), 'patch');
         }
     }
 
