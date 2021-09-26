@@ -578,6 +578,7 @@ class mod_zoom_webservice {
         if (isset($zoom->option_authenticated_users)) {
             $data['settings']['meeting_authentication'] = (bool) $zoom->option_authenticated_users;
         }
+        $data['settings']['auto_recording'] = 'cloud';
 
         if (!empty($zoom->webinar)) {
             if ($zoom->recurring) {
