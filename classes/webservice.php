@@ -366,7 +366,7 @@ class mod_zoom_webservice {
      */
     public function list_users() {
         if (empty(self::$userslist)) {
-            self::$userslist = $this->_make_paginated_call('users', array('include_fields' => 'custom_attributes'), 'users');
+            self::$userslist = $this->make_paginated_call('users', array('include_fields' => 'custom_attributes'), 'users');
         }
         return self::$userslist;
     }
