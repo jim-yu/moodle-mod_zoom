@@ -669,7 +669,7 @@ class mod_zoom_webservice {
         $revoke_user_ids_license = array_slice($user_ids, 0, $num_license);
 
         foreach ( $revoke_user_ids_license as $user_id ) {
-            $this->_make_call("users/$user_id", array('type' => ZOOM_USER_TYPE_BASIC), 'patch');
+            $this->make_call("users/$user_id", array('type' => ZOOM_USER_TYPE_BASIC), 'patch');
         }
     }
 
